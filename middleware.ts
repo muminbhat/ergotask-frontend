@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = new Set(['/login', '/api/auth/login', '/api/auth/refresh', '/api/auth/logout']);
+const PUBLIC_PATHS = new Set(['/login', '/signup', '/api/auth/login', '/api/auth/refresh', '/api/auth/logout', '/api/auth/register']);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (PUBLIC_PATHS.has(pathname) || pathname.startsWith('/_next') || pathname.startsWith('/public')) {
+  if (PUBLIC_PATHS.has(pathname) || pathname.startsWith('/api/auth') || pathname.startsWith('/_next') || pathname.startsWith('/public')) {
     return NextResponse.next();
   }
   const access = request.cookies.get('access_token')?.value;

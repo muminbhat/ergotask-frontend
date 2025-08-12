@@ -21,15 +21,14 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data?.error || 'Login failed');
-      }
+      const data = await res.json().catch(() => ({}));
+      const extract = (d) => d?.detail?.detail || d?.detail || d?.error || d?.message;
+      if (!res.ok) throw new Error(extract(data) || 'Login failed');
       toast.success('Signed in');
       const next = search.get('next') || '/';
       router.replace(next);
     } catch (err) {
-      toast.error(err.message || 'Login failed');
+      toast.error(err?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -96,17 +95,16 @@ export default function LoginPage() {
           </form>
 
           {/* Additional Info */}
-          <div className="text-center">
-            <p className="text-xs text-foreground/50">
-              AI-powered task management system
-            </p>
+          <div className="text-center text-sm">
+            <span className="text-foreground/60 mr-2">New here?</span>
+            <a href="/signup" className="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 text-green-700 dark:text-green-300 hover:opacity-80">Create an account</a>
           </div>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-xs text-foreground/40">
-            Secure authentication powered by JWT
+            Prepared for ErgoSphere by Mumin Bhat
           </p>
         </div>
       </div>
