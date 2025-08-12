@@ -197,6 +197,7 @@ export default function Home() {
           <p className="text-foreground/70 mb-4">
             Intelligent task prioritization, deadline suggestions, and context-aware recommendations powered by advanced AI.
           </p>
+          {/* Disabled for now due to alignement issues on ux */}
           {/* <div className="space-y-2 text-sm text-foreground/60">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500"></div>
