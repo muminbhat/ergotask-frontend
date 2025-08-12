@@ -170,38 +170,39 @@ export default function TasksPage() {
   const [search, setSearch] = useState('')
   const [openNL, setOpenNL] = useState(false)
   const [nlText, setNlText] = useState('')
+  const [nlLoading, setNlLoading] = useState(false)
 
-  useEffect(() => {
-    ;(async () => {
-      try {
-        const params = new URLSearchParams()
-        params.set('ordering', '-priority_score')
-        params.set('page_size', '100')
-        if (filterCategory && filterCategory !== 'all') params.set('category', filterCategory)
-        if (filterStatus && filterStatus !== 'all') params.set('status', filterStatus)
-        if (search.trim()) params.set('search', search.trim())
-        const [tasksRes, catsRes] = await Promise.all([
-          fetch(`/api/tasks?${params.toString()}`),
-          fetch('/api/categories'),
-        ])
-        const data = await tasksRes.json()
-        const catData = await catsRes.json()
-        const items = (Array.isArray(data) ? data : (data.results || []))
-          .filter((t) => (t.priority_score ?? 0) >= Number(minPriority || 0))
-        setCategories(Array.isArray(catData) ? catData : (catData.results || []))
-        const grouped = { todo: [], in_progress: [], done: [], archived: [] }
-        for (const t of items) {
-          const key = ['todo', 'in_progress', 'done', 'archived'].includes(t.status) ? t.status : 'todo'
-          if (grouped[key]) grouped[key].push(t)
-        }
-        setTasksByCol(grouped)
-      } catch (e) {
-        toast.error('Failed to load tasks')
-      } finally {
-        setLoading(false)
+  const loadTasks = async () => {
+    try {
+      const params = new URLSearchParams()
+      params.set('ordering', '-priority_score')
+      params.set('page_size', '100')
+      if (filterCategory && filterCategory !== 'all') params.set('category', filterCategory)
+      if (filterStatus && filterStatus !== 'all') params.set('status', filterStatus)
+      if (search.trim()) params.set('search', search.trim())
+      const [tasksRes, catsRes] = await Promise.all([
+        fetch(`/api/tasks?${params.toString()}`),
+        fetch('/api/categories'),
+      ])
+      const data = await tasksRes.json()
+      const catData = await catsRes.json()
+      const items = (Array.isArray(data) ? data : (data.results || []))
+        .filter((t) => (t.priority_score ?? 0) >= Number(minPriority || 0))
+      setCategories(Array.isArray(catData) ? catData : (catData.results || []))
+      const grouped = { todo: [], in_progress: [], done: [], archived: [] }
+      for (const t of items) {
+        const key = ['todo', 'in_progress', 'done', 'archived'].includes(t.status) ? t.status : 'todo'
+        if (grouped[key]) grouped[key].push(t)
       }
-    })()
-  }, [filterCategory, filterStatus, minPriority, search])
+      setTasksByCol(grouped)
+    } catch (e) {
+      toast.error('Failed to load tasks')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadTasks() }, [filterCategory, filterStatus, minPriority, search])
 
   const handleDragStart = (event) => {
     const { active } = event
@@ -321,13 +322,15 @@ export default function TasksPage() {
       <Dialog open={openNL} onOpenChange={setOpenNL}>
         <DialogContent className="backdrop-blur bg-card/90 border border-border">
           <DialogHeader>
-            <DialogTitle>Create tasks from text</DialogTitle>
+            <DialogTitle>Create tasks from text - Powered by AI</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <textarea value={nlText} onChange={(e) => setNlText(e.target.value)} rows={6} className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground" placeholder="Paste notes, email, or free text..." />
             <div className="flex gap-2">
               <button
                 onClick={async () => {
+                  if (nlLoading) return
+                  setNlLoading(true)
                   try {
                     const res = await fetch('/api/tasks/nl-create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: nlText }) })
                     const data = await res.json()
@@ -335,13 +338,18 @@ export default function TasksPage() {
                     toast.success(`Created ${data.count || 0} tasks`)
                     setOpenNL(false)
                     setNlText('')
+                    setLoading(true)
+                    await loadTasks()
                   } catch (e) {
                     toast.error(e.message || 'Failed')
+                  } finally {
+                    setNlLoading(false)
                   }
                 }}
-                className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 text-green-700 dark:text-green-300 hover:from-green-500/30 hover:to-blue-500/30 transition-all duration-300 backdrop-blur-sm font-medium text-sm"
+                disabled={nlLoading || !nlText.trim()}
+                className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 text-green-700 dark:text-green-300 hover:from-green-500/30 hover:to-blue-500/30 transition-all duration-300 backdrop-blur-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Generate & Create
+                {nlLoading ? 'Creating…' : 'Generate & Create'}
               </button>
               <button onClick={() => setOpenNL(false)} className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-gray-500/20 to-gray-600/20 border border-gray-500/30 text-gray-700 dark:text-gray-300 hover:from-gray-500/30 hover:to-gray-600/30 transition-all duration-300 backdrop-blur-sm font-medium text-sm">Close</button>
             </div>
