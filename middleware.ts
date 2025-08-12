@@ -5,10 +5,16 @@ const PUBLIC_PATHS = new Set(['/login', '/signup', '/api/auth/login', '/api/auth
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const access = request.cookies.get('access_token')?.value;
+  // If visiting login or signup with an access token, redirect to dashboard
+  if ((pathname === '/login' || pathname === '/signup') && access) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
   if (PUBLIC_PATHS.has(pathname) || pathname.startsWith('/api/auth') || pathname.startsWith('/_next') || pathname.startsWith('/public')) {
     return NextResponse.next();
   }
-  const access = request.cookies.get('access_token')?.value;
   if (!access) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
