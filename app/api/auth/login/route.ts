@@ -16,12 +16,11 @@ export async function POST(request: Request) {
     return NextResponse.json(data, { status: res.status });
   }
 
-  const cookieStore = cookies();
   const isProd = process.env.NODE_ENV === 'production';
-  cookieStore.set('access_token', data.access, { httpOnly: true, sameSite: 'lax', secure: isProd, path: '/' });
-  cookieStore.set('refresh_token', data.refresh, { httpOnly: true, sameSite: 'lax', secure: isProd, path: '/' });
-
-  return NextResponse.json({ ok: true });
+  const resp = NextResponse.json({ ok: true });
+  resp.cookies.set('access_token', data.access, { httpOnly: true, sameSite: 'lax', secure: isProd, path: '/' });
+  resp.cookies.set('refresh_token', data.refresh, { httpOnly: true, sameSite: 'lax', secure: isProd, path: '/' });
+  return resp;
 }
 
 
