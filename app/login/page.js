@@ -26,7 +26,12 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(extract(data) || 'Login failed');
       toast.success('Signed in');
       const next = search.get('next') || '/';
-      router.replace(next);
+      if (typeof window !== 'undefined') {
+        window.location.assign(next);
+      } else {
+        router.replace(next);
+        router.refresh();
+      }
     } catch (err) {
       toast.error(err?.message || 'Login failed');
     } finally {
