@@ -21,7 +21,12 @@ export default function SignupPage() {
       const extract = (d) => d?.username?.[0] || d?.detail?.detail || (typeof d?.detail === 'string' ? d.detail : null) || d?.error || d?.message
       if (!res.ok) throw new Error(extract(data) || 'Signup failed')
       toast.success('Account created')
-      router.replace('/')
+      if (typeof window !== 'undefined') {
+        window.location.assign('/')
+      } else {
+        router.replace('/')
+        router.refresh()
+      }
     } catch (e) {
       toast.error(e?.message || 'Signup failed')
     } finally {
