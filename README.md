@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+ErgoTask Frontend (Next.js + Tailwind) - Prepared for Ergosphere.io (Evaluation Purpose Only) - By Mumin Bhat (12th August 2025)
 
-## Getting Started
+Overview
+- Modern app router (Next.js 15), server-side API routes as BFF (proxy to Django), JWT cookies with refresh.
+- Pages: Dashboard, Task board, Task detail (AI suggest/apply, schedule), Contexts (list/new), Login/Signup.
 
-First, run the development server:
+Local setup
+1) Node 18+ and PNPM or NPM
+2) Env:
+   - `NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000` This is where your backend will be pointing to, change if its different. 
+3) Install and run:
+   - `npm install`
+   - `npm run dev`
+   - Open http://localhost:3000
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Production (Vercel)
+- Set env: `NEXT_PUBLIC_API_BASE_URL=https://ergotask-production.up.railway.app` enter backend endpoint in variable
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Auth UX
+- Login/Signup set `access_token`/`refresh_token` HTTP-only cookies and a non-http-only `is_logged_in=1` for nav.
+- Middleware:
+  - Redirects authenticated users away from `/login` and `/signup` to `/`.
+  - Redirects unauthenticated users visiting protected pages to `/login?next=...`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Common actions
+- Seed sample data for the logged-in user: open `/api/tasks/seed-sample-data` in the browser. (This will populate data)
+- Export: `/api/tasks/export?format=json|csv` (proxy to backend). (To export the data)
