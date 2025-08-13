@@ -16,7 +16,8 @@ export function MobileNav() {
   }, [])
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/70 backdrop-blur md:hidden">
+    <div>
+    {/* <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/70 backdrop-blur md:hidden">
       <div className="mx-auto max-w-7xl flex items-center justify-around h-14 px-4">
         <Link href="/" className={`flex flex-col items-center text-xs ${isActive('/') ? 'text-white' : 'text-neutral-300'}`}>
           <Home className="w-5 h-5" />
@@ -47,6 +48,7 @@ export function MobileNav() {
         )}
         <ThemeToggle />
       </div>
+    </div> */}
     </div>
   )
 }
